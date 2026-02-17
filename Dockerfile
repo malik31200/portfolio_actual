@@ -12,8 +12,7 @@ RUN apt-get update && apt-get install -y \
     curl
 
 # Install PHP extensions for Symfony
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install pdo pdo_mysql zip mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo pdo_mysql zip mbstring exif pcntl bcmath gd
 
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
