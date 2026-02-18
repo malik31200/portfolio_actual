@@ -219,4 +219,64 @@ class AdminController extends AbstractController
 
         return $this->redirectToRoute('admin_sessions_list');
     }
+
+    // =============== HANDLE THE REGISTRATIONS =============== //
+
+    // List of registrations
+    #[Route('/admin/registrations', name: 'admin_registrations')]
+    public function listRegistrations(Request $request, EntityManagerInterface $em): Response
+    {
+        $status = $request->query->get('status', 'all');
+        $courseId = $request->query->get('course');
+        $startDateString = $request->query->get('start_date');
+        $endDateString = $request->query->get('end_date');
+
+        // Convert date string to DateTime if provided
+        $startDate = null;
+        $enDate = null;
+
+        if ($startDateString) {
+            try{
+                $startDate = new \DateTime($startDateString);
+            } catch (\Exception $e) {
+                $startDate = null;
+            }
+        }
+
+        if ($endDateString) {
+            try{
+                $endDate = new \DateTime($endDateString);
+            } catch (\Exception $e) {
+                $endDate = null;
+            }
+        }
+
+        // Get filtered registrations using our method
+        $registrations = $em->getRepository(Registration::class)->findWithFilters(
+            $status,
+            $courseId ? (int)$courseId : null,
+            $startDate,
+            $endDate
+        );
+
+        // Get all courses for the filter dropdown
+        $courses = $em->getRepository(Course::class)->findBy(['isActive' === true], ['name' => 'ASC']);
+
+        // Statistic
+        $totalRegistrations = count($registrations);
+        $activeCount = $em->getRepository(Registration::class)->count(['status' => 'confirmed']);
+        $cancelledCount = $em->getRepository(Registration::class)->count(['status' => 'cancelled']);
+
+        return $this->render('admin/registrations/list.html.twig', [
+            'registrations' => $registrations,
+            'courses' => $courses,
+            'currentStatus' => $status,
+            'selectedCourse' => $courseId,
+            'selectedStartDate' => $startDateString,
+            'selectedEndDate' => $endDateString,
+            'totalRegistrations' => $totalRegistrations,
+            'activeCount' => $activeCount,
+            'cancelledCount' => $cancelledCount,
+        ]);
+    }
 }
