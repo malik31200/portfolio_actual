@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Web;
 
 use App\Entity\Course;
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_ADMIN')]
+// #[IsGranted('ROLE_ADMIN')]
 class AdminController extends AbstractController
 {
     // =============== HANDLE THE COURSES =============== //
@@ -50,5 +50,53 @@ class AdminController extends AbstractController
         return $this->render('admin/courses/form.html.twig', [
             'course' => null,
         ]);
+    }
+
+    // Edit a course
+    #[Route('admin/courses/edit/{id}', name: 'admin_courses_edit', methods:['GET', 'POST'])]
+    public function editCourse($id, Request $request, EntityManagerInterface $em): Response
+    {
+        $course = $em->getRepository(Course::class)->find($id);
+
+        if (!$course) {
+            $this->addFlash('error', 'Cours non trouvé.');
+            return $this->redirectToRoute('admin_courses_list');
+        }
+
+        if ($request->isMethod('POST')) {
+            $course->setName($request->request->get('name'));
+            $course->setDescription($request->request->get('description'));
+            $course->setDuration((int) $request->request->get('duration'));
+            $course->setMaxParticipants((int) $request->request->get('maxParticipants'));
+            $course->setPrice($request->request->get('price'));
+            $course->setIsActive($request->request->get('isActive') === '1');
+
+            $em->flush();
+
+            $this->addFlash('success', 'Cours modifié avec succès !');
+            return $this->redirectToRoute('admin_courses_list');
+        }
+
+        return $this->render('admin/courses/form.html.twig', [
+            'course' => $course,
+        ]);
+    }
+
+    // Delete a course
+    #[Route('/admin/courses/delete/{id}', name: 'admin_courses_delete', methods: ['POST'])]
+    public function deleteCourse($id, EntityManagerInterface $em)
+    {
+        $course = $em->getRepository(Course::class)->find($id);
+
+        if (!$course) {
+            $this->addFlash('error', 'Cours non trouvé.');
+            return $this->redirectToRoute('admin_courses_list');
+        }
+
+        $em->remove($course);
+        $em->flush();
+
+        $this->addFlash('success', 'Cours supprimé avec succès !');
+        return $this->redirectToRoute('admin_courses_list');
     }
 }
