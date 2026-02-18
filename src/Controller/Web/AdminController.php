@@ -4,6 +4,7 @@ namespace App\Controller\Web;
 
 use App\Entity\Course;
 use App\Entity\Session;
+use App\Entity\Registration;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -155,5 +156,67 @@ class AdminController extends AbstractController
         ]);
     }
 
+    // Edit a session
+    #[Route('/admin/sessions/edit/{id}', name: 'admin_sessions_edit', methods:['GET', 'POST'])]
+    public function editSession($id, Request $request, EntityManagerInterface $em): Response
+    {
+        $session = $em->getRepository(Session::class)->find($id);
+        $courses = $em->getRepository(Course::class)->findBy(['isActive' === true]);
+
+        if (!$session) {
+            $this->addFlash('error', 'Session non trouvée');
+            return $this->redirectToRoute('admin_sessions_list');
+        }
+
+        if ($request->isMethod('POST')) {
+            $courseId = $request->request->get('course_id');
+            $course = $em->getRepository(Course::class)->find($courseId);
+
+            if ($course) {
+                $session->setCourse($course);
+            }
+
+            $session->setStartTime(new \DateTimeImmutable($request->request->get('start_time')));
+            $session->setEndTime(new \DateTimeImmutable($request->request->get('end_time')));
+            $session->setAvailableSpots((int) $request->request->get('available_spots'));
+            $session->setStatus($request->request->get('status'));
+
+            $em->flush();
+
+            $this->addFlash('success', 'Session modifiée avec succès !');
+            return $this->redirectToRoute('admin_sessions_list');
+        }
+
+        return $this->render('admin/sessions/form.html.twig', [
+            'session' => $session,
+            'courses' => $courses,
+        ]);
+    }
+
+    // Delete a session
+    #[Route('/admin/sessions/delete/{id}', name: 'admin_sessions_delete', methods: ['POST'])]
+    public function deleteSession($id, EntityManagerInterface $em): Response
+    {
+        $session = $em->getRepository(Session::class)->find($id);
+
+        if(!$session) {
+            $this->addFlash('error', 'Session non trouvée');
+            return $this->redirectToRoute('admin_sessions_list');
+        }
+
+        // Check if there are the registrations
+        $registrations = $em->getRepository(Registration::class)->findBy(['session' => $session]);
+
+        if (count($registrations) > 0) {
+            $this->addFlash('error', 'Impossible de supprimer cette session : '. count($registrations) . 'réservation(s) exist(ent).');
+            return $this->redirectToRoute('admin_sessions_list');
+        }
+
+        $em->remove($session);
+        $em->flush();
+
+        $this->addFlash('success', 'Session supprimée avec succès !');
+
+        return $this->redirectToRoute('admin_sessions_list');
+    }
 }
-_
