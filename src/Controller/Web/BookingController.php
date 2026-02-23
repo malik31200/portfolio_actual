@@ -88,7 +88,7 @@ class BookingController extends AbstractController
             $em->persist($session);
             $em->flush();
 
-            $this->addFlash('success', 'Session réservée avec succès en utilisant votre carnet ! Il vous reste ' . $sessionBook->getRemainingSessions() . 'session(s).');
+            $this->addFlash('success', 'Session réservée avec succès en utilisant votre carnet ! Il vous reste ' . $sessionBook->getRemainingSessions() . ' session(s).');
 
             return $this->redirectToRoute('app_dashboard');
         } else {
@@ -128,6 +128,7 @@ class BookingController extends AbstractController
     }
 
     #[Route('/booking/cancel/{id}', name: 'booking_cancel', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function cancel(int $id, EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
@@ -146,10 +147,140 @@ class BookingController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
+        // Check if a registration is confirmed
+        if ($registration->getStatus() !== 'confirmed') {
+            $this->addFlash('error', 'Cette réservation est déjà annulée.');
+            return $this->redirectToRoute('app_dashboard');
+        }
+
         // Check if session is in the future
-        if ($registration->getSession()->getStartTime() <= new \DateTimeImmutable('now', new DateTimeZone('Europe/Paris'))) {
+        if ($registration->getSession()->getStartTime() <= new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'))) {
             $this->addFlash('error', 'Cette session est passée, vous ne pouvez plus l\'annuler.');
             return $this->redirectToRoute('app_dashboard');
+        }
+
+        // Cancel the registration
+        $registration->setStatus('cancelled');
+        $registration->setCancelledAt(new \DateTimeImmutable());
+
+        // Free the spot in the session
+        $session = $registration->getSession();
+        $session->setAvailableSpots($session->getAvailableSpots() + 1);
+
+        // If a sessionBook was used, recredit it
+        if ($registration->getSessionBook()) {
+            $sessionBook = $registration->getSessionBook();
+            $sessionBook->setRemainingSessions($sessionBook->getRemainingSessions() + 1);
+            $em->persist($sessionBook);
+
+            $this->addFlash('success', 'Réservation annulée avec succès. Votre crédit du carnet a été restauré.');
+        } else {
+            $this->addFlash('success', 'Réservation annulée avec succès.');
+        }
+
+        $em->persist($registration);
+        $em->persist($session);
+        $em->flush();
+
+        return $this->redirectToRoute('app_dashboard');
+    }
+
+    #[Route('/booking/payment-success', name: 'booking_payment_success')]
+    #[IsGranted('ROLE_USER')]
+    public function paymentSuccess(Request $request, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+
+        // Retrieve the parameters
+        $sessionId = (int) $request->query->get('sessionId');
+        $stripeSessionId = $request->query->get('stripe_session_id');
+
+        if (!$sessionId || !$stripeSessionId) {
+            $this->addFlash('error', 'Paramètres manquants.');
+            return $this->redirectToRoute('app_sessions');
+        }
+
+        // Retrieve the session
+        $session = $em->getRepository(Session::class)->find($sessionId);
+
+        if (!$session) {
+            $this->addFlash('error', 'Session non trouvée.');
+            return $this->redirectToRoute('app_sessions');
+        }
+
+        // Check if there are still places available
+         if ($session->getAvailableSpots() <= 0) {
+            $this->addFlash('error', 'Il n\'y a plus de places disponibles.');
+            return $this->redirectToRoute('app_sessions');
+         }
+
+        // Check the payment with Stripe
+        \Stripe\Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+
+        try {
+            $stripeSession = \Stripe\Checkout\Session::retrieve($stripeSessionId);
+
+            // Check payment  if made
+            if ($stripeSession->payment_status !== 'paid') {
+                $this->addFlash('error', 'Le paiement n\'a pas été complété.');
+                return $this->redirectToRoute('app_sessions');
+            }
+
+            // Check that this payment has not already been procesed
+            $existingPayment = $em->getRepository(Payment::class)-> findOneBy ([
+                'stripePaymentId' => $stripeSessionId
+            ]);
+
+            if ($existingPayment) {
+                $this->addFlash('info', 'Cette réservation a déjà été enregistrée.');
+                return $this->redirectToRoute('app_dashboard');
+            }
+
+            // Check if registration is existing
+            $existingRegistration = $em->getRepository(Registration::class)->findOneBy([
+                'user' => $user,
+                'session' => $session,
+                'status' => 'confirmed'
+            ]);
+
+            if ($existingRegistration) {
+                $this->addFlash('error', 'Vous avez déjà réservé cette session.');
+                return $this->redirectToRoute('app_dashboard');
+            }
+
+            $em->beginTransaction();
+
+            // Create the registration
+            $registration = new Registration();
+            $registration->setUser($user);
+            $registration->setSession($session);
+            $registration->setStatus('confirmed');
+            $registration->setRegisteredAt(new \DateTimeImmutable());
+            $registration->setStripeSessionId($stripeSessionId);
+
+            // Create the payment
+            $payment = new Payment();
+            $payment->setUser($user);
+            $payment->setRegistration($registration);
+            $payment->setAmount($session->getCourse()->getPrice());
+            $payment->setStripePaymentId($stripeSessionId);
+            $payment->setCreatedAt(new \DateTimeImmutable());
+
+            // Decrement the places
+            $session->setAvailableSpots($session->getAvailableSpots() - 1);
+
+            // Save
+            $em->persist($registration);
+            $em->persist($payment);
+            $em->persist($session);
+            $em->flush();
+
+            $this->addFlash('success', 'Paiement réussi ! Votre session a été réservée.');
+            return $this->redirectToRoute('app_dashboard');
+
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de la vérification du paiement : ' . $e->getMessage());
+            return $this->redirectToRoute('app_sessions');
         }
     }
 }
