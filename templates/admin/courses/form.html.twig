@@ -5,13 +5,13 @@
 {% block body %}
     <div class="admin-header">
         <h1 class="page-title">{{ course ? '✏️ Modifier' : '➕ Créer' }}</h1>
-        <a href="{{ path('admin_courses_list') }}" class"btn btn-secondary">Retour à la liste</a>
+        <a href="{{ path('admin_courses_list') }}" class="btn btn-secondary">Retour à la liste</a>
     </div>
 
     <div class="card form-card">
         <form method="post">
             <div class="form-group">
-                <label for="name">Nom du cours</label>
+                <label for="name">Nom du cours *</label>
                 <input
                     type="text"
                     id="name"
@@ -53,7 +53,7 @@
                         type="number"
                         id="max_participants"
                         name="max_participants"
-                        value=" {{ course ? course.maxParticipants : '' }}"
+                        value="{{ course ? course.maxParticipants : '' }}"
                         required
                         min="1"
                         step="1"
@@ -68,7 +68,7 @@
                     <option value="1" {{ course and course.isActive ? 'selected' : '' }}>Actif</option>
                     <option value="0" {{ course and not course.isActive ? 'selected': '' }}>Inactif</option>
                 </select>
-            <div>
+            </div>
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-full">
