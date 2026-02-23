@@ -5,6 +5,7 @@ namespace App\Controller\Web;
 use App\Entity\Course;
 use App\Entity\Session;
 use App\Entity\Registration;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -233,7 +234,7 @@ class AdminController extends AbstractController
 
         // Convert date string to DateTime if provided
         $startDate = null;
-        $enDate = null;
+        $endDate = null;
 
         if ($startDateString) {
             try{
@@ -260,7 +261,7 @@ class AdminController extends AbstractController
         );
 
         // Get all courses for the filter dropdown
-        $courses = $em->getRepository(Course::class)->findBy(['isActive' === true], ['name' => 'ASC']);
+        $courses = $em->getRepository(Course::class)->findBy(['isActive' => true], ['name' => 'ASC']);
 
         // Statistic
         $totalRegistrations = count($registrations);
@@ -279,4 +280,39 @@ class AdminController extends AbstractController
             'cancelledCount' => $cancelledCount,
         ]);
     }
+
+    // Cancelled a registration
+    #[Route('/admin/registrations/cancel/{id}', name: 'admin_registrations_cancel', methods: ['POST'])]
+    public function cancelRegistration($id, EntityManagerInterface $em)
+    {
+        $registration = $em->getRepository(Registration::class)->find($id);
+
+        if (!$registration) {
+            $this->addFlash('error', 'Réservation non trouvée');
+            return $this->redirectToRoute('admin_registrations_list');
+        }
+
+        if ($registration->getStatus() === 'cancelled') {
+            $this->addFlash('error', 'Cette réservation est déjà annulée.');
+            return $this->redirectToRoute('admin_registrations_list');
+        }
+
+        // Change the status
+        $registration->setStatus('cancelled');
+
+        // Fee up a space in the session
+        $session = $registration->getSession();
+        if($session) {
+            $session->setAvailableSpots($session->getAvailableSpots() +1);
+        }
+
+        $em->flush();
+
+        $this->addFlash('success', 'Réservation annulée avec succès ! Une place a été libérée.');
+        return $this->redirectToRoute('admin_registrations_list');
+    }
+
+    // =============== HANDLE THE USERS =============== //
+
+    // List of users
 }
