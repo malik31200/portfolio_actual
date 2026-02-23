@@ -57,7 +57,7 @@ class AdminController extends AbstractController
 
     // Edit a course
     #[Route('/admin/courses/edit/{id}', name: 'admin_courses_edit', methods: ['GET', 'POST'])]
-    public function editCourse($id, Request $request, EntityManagerInterface $em): Response
+    public function editCourse(int $id, Request $request, EntityManagerInterface $em): Response
     {
         $course = $em->getRepository(Course::class)->find($id);
 
@@ -159,7 +159,7 @@ class AdminController extends AbstractController
 
     // Edit a session
     #[Route('/admin/sessions/edit/{id}', name: 'admin_sessions_edit', methods:['GET', 'POST'])]
-    public function editSession($id, Request $request, EntityManagerInterface $em): Response
+    public function editSession(int $id, Request $request, EntityManagerInterface $em): Response
     {
         $session = $em->getRepository(Session::class)->find($id);
         $courses = $em->getRepository(Course::class)->findBy(['isActive' === true]);
@@ -196,7 +196,7 @@ class AdminController extends AbstractController
 
     // Delete a session
     #[Route('/admin/sessions/delete/{id}', name: 'admin_sessions_delete', methods: ['POST'])]
-    public function deleteSession($id, EntityManagerInterface $em): Response
+    public function deleteSession(int $id, EntityManagerInterface $em): Response
     {
         $session = $em->getRepository(Session::class)->find($id);
 
@@ -283,7 +283,7 @@ class AdminController extends AbstractController
 
     // Cancelled a registration
     #[Route('/admin/registrations/cancel/{id}', name: 'admin_registrations_cancel', methods: ['POST'])]
-    public function cancelRegistration($id, EntityManagerInterface $em)
+    public function cancelRegistration(int $id, EntityManagerInterface $em): Response
     {
         $registration = $em->getRepository(Registration::class)->find($id);
 
@@ -315,4 +315,95 @@ class AdminController extends AbstractController
     // =============== HANDLE THE USERS =============== //
 
     // List of users
+    #[Route('/admin/users', name: 'admin_users_list')]
+    public function listUsers(EntityManagerInterface $em): Response
+    {
+        $users = $em->getRepository(User::class)->findAll();
+
+        // Statistic
+        $totalUsers = count($users);
+        $adminCount = 0;
+        $userCount =0;
+
+        foreach ($users as $user) {
+            if (in_array('ROLE_ADMIN', $user->getRoles())) {
+                $adminCount++;
+            } else {
+                $userCount++;
+            }
+        }
+
+        return $this->render('admin/users/list.html.twig', [
+            'users' => $users,
+            'totalUsers' => $totalUsers,
+            'adminCount' => $adminCount,
+            'userCount' => $userCount,
+        ]);
+    }
+
+    // See a detail of an user
+    #[Route('/admin/Users/{id}', name: 'admin_user_show')]
+    public function showUser(int $id, EntityManagerInterface $em): Response
+    {
+        $user = $em->getRepository(User::class)->find($id);
+
+        if (!$user) {
+            $this->addFlash('error', 'Utilisateur non trouvé.');
+            return $this->redirectToRoute('admin_users_list');
+        }
+
+        // Retrieve the history
+        $registrations = $em->getRepository(Registration::class)->findBy (
+            ['user' => $user],
+            ['registeredAt' => 'DESC'],
+        );
+
+        $sessionBooks = $em->getRepository(SessionBook::class)->findBy (
+            ['user' => $user],
+            ['createdAt' => 'DESC']
+        );
+
+        $payments = $em->getRepository(Payment::class)->findBy (
+            ['user' => $user],
+            ['createdAt' => 'DESC']
+        );
+
+        return $this->render('admin/users/show.html.twig', [
+            'user' => $user,
+            'registrations' => $registrations,
+            'sessionBooks' => $sessionBooks,
+            'payments' => $payments,
+        ]);
+    }
+
+    #[Route('/admin/users/{id}/toggle-role', name: 'admin_users_toggle_role', methods: ['POST'])]
+    public function toggleRole(int $id, EntityManagerInterface $em): Response
+    {
+        $user = $em->getRepository(User::class)->find($id);
+
+        if (!$user) {
+            $this->addFlash('error', 'Utilisateur non trouvé.');
+            return $this->redirectToRoute('admin_users_list');
+        }
+
+        // Do not change your own role
+        if ($user->getId() === $this->getUser()->getId()) {
+            $this->addFlash('error', 'Vous ne pouvez pas modifier votre propre rôle.');
+            return $this->redirectToRoute('admin_users_list');
+        }
+
+        // Toggle between ROLE_USER and ROLE_ADMIN
+        $roles = $user->getRoles();
+        if (in_array('ROLE_ADMIN', $roles)) {
+            $user->setRoles(['ROLE_USER']);
+            $this->addFlash('success', 'Utilisateur rétrogradé en User');
+        } else {
+            $user->setRoles(['ROLE_ADMIN']);
+            $this->addFlash('success', 'Utilisateur promu en Admin');
+        }
+
+        $em->flush();
+
+        return $this->redirectToRoute('admin_users_list');
+    }
 }
