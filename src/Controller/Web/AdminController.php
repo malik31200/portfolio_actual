@@ -6,6 +6,8 @@ use App\Entity\Course;
 use App\Entity\Session;
 use App\Entity\Registration;
 use App\Entity\User;
+use App\Entity\SessionBook;
+use App\Entity\Payment;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -342,7 +344,7 @@ class AdminController extends AbstractController
     }
 
     // See a detail of an user
-    #[Route('/admin/Users/{id}', name: 'admin_user_show')]
+    #[Route('/admin/Users/{id}', name: 'admin_users_show')]
     public function showUser(int $id, EntityManagerInterface $em): Response
     {
         $user = $em->getRepository(User::class)->find($id);
