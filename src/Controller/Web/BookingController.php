@@ -248,7 +248,8 @@ class BookingController extends AbstractController
                 return $this->redirectToRoute('app_dashboard');
             }
 
-            $em->beginTransaction();
+            $connection = $em->getConnection();
+            $connection->beginTransaction();
 
             // Create the registration
             $registration = new Registration();
@@ -273,11 +274,15 @@ class BookingController extends AbstractController
             $em->persist($payment);
             $em->persist($session);
             $em->flush();
+            $connection->commit();
 
             $this->addFlash('success', 'Paiement réussi ! Votre session a été réservée.');
             return $this->redirectToRoute('app_dashboard');
 
         } catch (\Exception $e) {
+            if (isset($connection) && $connection->isTransactionActive()) {
+                $connection->rollBack();
+}
             $this->addFlash('error', 'Erreur lors de la vérification du paiement : ' . $e->getMessage());
             return $this->redirectToRoute('app_sessions');
         }
