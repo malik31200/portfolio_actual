@@ -1,0 +1,156 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des réservations - Admin{% endblock %}
+
+{% block body %}
+    <div class="admin-header">
+        <h1 class="page-title">📋 Gestion des réservations</h1>
+    </div>
+
+    {# Filters Section #}
+    <div class="filter-card">
+        <h3>🔍 Filtrer les réservations</h3>
+        <form method="get" action="{{ path('admin_registrations_list') }}" class="filter-form">
+            <div class="filter-row" style="grid-template-columns: 1fr 1fr 1fr 1fr auto;">
+                <div class="filter-group">
+                    <label for="status">Statut</label>
+                    <select name="status" id="status" class="filter-select">
+                        <option value="all" {% if currentStatus == 'all' %}selected{% endif %}>Tous</option>
+                        <option value="confirmed" {% if currentStatus == 'confirmed' %}selected{% endif %}>Confirmées</option>
+                        <option value="cancelled" {% if currentStatus == 'cancelled' %}selected{% endif %}>Annulées</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="course">Cours</label>
+                    <select name="course" id="course" class="filter-select">
+                        <option value="">Tous les cours</option>
+                        {% for course in courses %}
+                            <option value="{{ course.id}}" {% if selectedCourse == course.id %}selected{% endif %}>
+                                {{ course.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="start_date">Du</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ selectedStartDate }}" class="filter-input">
+                </div>
+
+                <div class="filter-group">
+                    <label for="end_date">Au</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ selectedEndDate }}" class="filter-input">
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">Filtrer</button>
+                    <a href="{{ path('admin_registrations_list') }}" class="btn btn-secondary">Réinitialiser</a>                
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {# Statistics #}
+    <div class="stats-mini-grid">
+        <div class="stats-mini-card">
+            <div class="stat-mini-number">{{ totalRegistrations }}</div>
+            <div class="stat-mini-label">Total réservations</div>
+        </div>
+
+        <div class="stats-mini-card stat-success">
+            <div class="stat-mini-number">{{ activeCount }}</div>
+            <div class="stat-mini-label">Actives</div>
+        </div>
+
+        <div class="stats-mini-card stat-danger">
+            <div class="stat-mini-number">{{ cancelledCount }}</div>
+            <div class="stat-mini-label">Annulées</div>
+        </div>
+    </div>
+
+    {# Filters #}
+    <div class="card filter-card">
+        <div class="filter-buttons">
+        <a href="{{ path('admin_registrations_list', {status: 'all'}) }}"
+        class="btn {{ currentStatus == 'all' ? 'btn-primary' : 'btn-secondary' }}">
+            Toutes
+        </a>
+        <a href="{{ path('admin_registrations_list', {status: 'confirmed'}) }}"
+        class="btn {{ currentStatus == 'confirmed' ? 'btn-primary' : 'btn-secondary' }}">
+            Actives
+        </a>
+        <a href="{{ path('admin_registrations_list', {status: 'cancelled'}) }}"
+        class="btn {{ currentStatus == 'cancelled' ? 'btn-primary' : 'btn-secondary' }}">
+            Annulées
+        </a>
+        </div>
+    </div>
+
+    {# Lists of registrations #}
+    {% if registrations is empty %}
+        <div class="card">
+            <p class="text-muted">Aucune réservation trouvée</p>
+        </div>
+    {% else %}
+    <div class="card">
+        <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Utilisateur</th>
+                <th>Cours</th>
+                <th>Session</th>
+                <th>Date d'inscription</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registration in registrations %}
+                <tr>
+                    <td>{{ registration.id }}</td>
+                    <td>
+                        <strong> {{ registration.user.firstName }} {{ registration.user.lastName }}</strong>
+                        <br>
+                        <small class="text-muted"> {{ registration.user.email }} </small>
+                    </td>
+                    <td> {{ registration.session.course.name }}</td>
+                    <td>
+                        {{ registration.session.startTime|date('d/m/Y') }}
+                        <br>
+                        <small class="text-muted">
+                            {{ registration.session.startTime|date('H:i') }} - {{ registration.session.endTime|date('H:i') }}
+                        </small>
+                    </td>
+                    <td>
+                        {{ registration.createdAt|date('d/m/Y H:i') }}
+                    </td>
+                    <td>
+                        {% if registration.status == 'confirmed' %}
+                            <span class="badge badge-active">Confirmée</span>
+                        {% elseif registration.status == 'cancelled' %}
+                            <span class="badge badge-cancelled">Annulée</span>
+                        {% else %}
+                            <span class="badge badge-pending">{{ registration.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="action-buttons">
+                        {% if registration.status != 'cancelled' %}
+                            <form method="post"
+                            action="{{ path('admin_registrations_cancel', {id: registration.id}) }}"
+                            style="display:inline;"
+                            onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">
+                                <button type="submit" class="btn btn-danger btn-sm">❌ Annuler</button>
+                            </form>
+                        {% else %}
+                            <span class="text-muted">Déjà annulée</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% endblock %}
