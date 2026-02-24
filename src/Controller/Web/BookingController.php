@@ -59,7 +59,7 @@ class BookingController extends AbstractController
         // Check if the user has a sessionBook with remaining sessions
         $sessionBook = $em->createQueryBuilder()
             ->select('sb')
-            ->from(SessionBook::class)
+            ->from(SessionBook::class, 'sb')
             ->where('sb.user = :user')
             ->andWhere('sb.remainingSessions > 0')
             ->andWhere('sb.expiresAt > :now')
