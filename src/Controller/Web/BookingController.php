@@ -256,7 +256,6 @@ class BookingController extends AbstractController
             $registration->setSession($session);
             $registration->setStatus('confirmed');
             $registration->setRegisteredAt(new \DateTimeImmutable());
-            $registration->setStripeSessionId($stripeSessionId);
 
             // Create the payment
             $payment = new Payment();
