@@ -80,6 +80,15 @@ class BookingController extends AbstractController
             $registration->setRegisteredAt(new \DateTimeImmutable());
             $registration->setSessionBook($sessionBook);
 
+            $payment = new Payment();
+            $payment->setUser($user);
+            $payment->setRegistration($registration);
+            $payment->setSessionBook($sessionBook);
+            $payment->setAmount('0');
+            $payment->setCreatedAt(new \DateTimeImmutable());
+
+            $em->persist($payment);
+
             $sessionBook->setRemainingSessions($sessionBook->getRemainingSessions() - 1);
             $session->setAvailableSpots($session->getAvailableSpots() -1);
 
