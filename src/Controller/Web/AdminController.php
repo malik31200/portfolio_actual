@@ -164,7 +164,7 @@ class AdminController extends AbstractController
     public function editSession(int $id, Request $request, EntityManagerInterface $em): Response
     {
         $session = $em->getRepository(Session::class)->find($id);
-        $courses = $em->getRepository(Course::class)->findBy(['isActive' === true]);
+        $courses = $em->getRepository(Course::class)->findBy(['isActive' => true]);
 
         if (!$session) {
             $this->addFlash('error', 'Session non trouvée');
@@ -226,7 +226,7 @@ class AdminController extends AbstractController
     // =============== HANDLE THE REGISTRATIONS =============== //
 
     // List of registrations
-    #[Route('/admin/registrations', name: 'admin_registrations')]
+    #[Route('/admin/registrations', name: 'admin_registrations_list')]
     public function listRegistrations(Request $request, EntityManagerInterface $em): Response
     {
         $status = $request->query->get('status', 'all');
