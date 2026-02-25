@@ -48,7 +48,7 @@ class AdminController extends AbstractController
             $em->persist($course);
             $em->flush();
 
-            $this->addFlash('success', 'Cours crée avec succès !');
+            $this->addFlash('success', 'Cours créé avec succès !');
             return $this->redirectToRoute('admin_courses_list');
         }
 
