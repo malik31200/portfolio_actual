@@ -124,7 +124,7 @@
                         </small>
                     </td>
                     <td>
-                        {{ registration.createdAt|date('d/m/Y H:i') }}
+                        {{ registration.registeredAt|date('d/m/Y H:i') }}
                     </td>
                     <td>
                         {% if registration.status == 'confirmed' %}
