@@ -33,7 +33,7 @@ class RegistrationRepository extends ServiceEntityRepository
                 ->leftJoin('r.session', 's')
                 ->leftJoin('s.course', 'c')
                 ->addSelect('u', 's', 'c')
-                ->orderBy('r.registeredAt', 'DESC');
+                ->orderBy('r.registeredAt', 'ASC');
 
         // Filter by status if provided
         if ($status && $status !== 'all') {
