@@ -356,6 +356,10 @@ footer {
     font-size: 3rem;
 }
 
+.stat-card .stat-icon {
+    color: rgba(255, 255, 255, 0.95);
+}
+
 .stat-number {
     font-size: 2.5rem;
     font-weight: bold;
@@ -364,6 +368,14 @@ footer {
 .stat-label {
     font-size: 1rem;
     opacity: 0.9;
+}
+
+.stat-card .stat-number {
+    color: white;
+}
+
+.stat-card .stat-label {
+    color: rgba(255, 255, 255, 0.9);
 }
 
 /* Admin Actions */
