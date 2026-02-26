@@ -138,10 +138,30 @@ class AdminController extends AbstractController
                 return $this->redirectToRoute('admin_sessions_new');
             }
 
+            $startTime = new \DateTimeImmutable($request->request->get('start_time'));
+            $endTime = new \DateTimeImmutable($request->request->get('end_time'));
+
+            if ($endTime <= $startTime) {
+                $this->addFlash('error', 'L\'heure de fin doit être après l\'heure de début.');
+                return $this->redirectToRoute('admin_sessions_new');
+            }
+
+            $durationMinutes = (int) (($endTime->getTimestamp() - $startTime->getTimestamp()) / 60);
+            $courseDuration = (int) $course->getDuration();
+
+            if ($durationMinutes !== $courseDuration) {
+                $this-> addFlash('error', sprintf(
+                    'Durée invalide : ce cours dure %d min, la session saisie fait %d min.',
+                    $courseDuration,
+                    $durationMinutes
+                ));
+                return $this->redirectToRoute('admin_sessions_new');
+            }
+
             $session = new Session();
             $session->setCourse($course);
-            $session->setStartTime(new \DateTimeImmutable($request->request->get('start_time')));
-            $session->setEndTime(new \DateTimeImmutable($request->request->get('end_time')));
+            $session->setStartTime($startTime);
+            $session->setEndTime($endTime);
             $session->setAvailableSpots((int) $request->request->get('available_spots'));
             $session->setStatus($request->request->get('status'));
             $session->setCreatedAt(new \DateTimeImmutable());
@@ -179,8 +199,29 @@ class AdminController extends AbstractController
                 $session->setCourse($course);
             }
 
-            $session->setStartTime(new \DateTimeImmutable($request->request->get('start_time')));
-            $session->setEndTime(new \DateTimeImmutable($request->request->get('end_time')));
+            $startTime = new \DateTimeImmutable($request->request->get('start_time'));
+            $endTime = new \DateTimeImmutable($request->request->get('end_time'));
+
+            if ($endTime <= $startTime) {
+                $this->addFlash('error', 'L\'heure de fin doit être après l\'heure de début.');
+                return $this->redirectToRoute('admin_sessions_new');
+            }
+
+            $durationMinutes = (int) (($endTime->getTimestamp() - $startTime->getTimestamp()) / 60);
+            $courseDuration = (int) $course->getDuration();
+
+            if ($durationMinutes !== $courseDuration) {
+                $this-> addFlash('error', sprintf(
+                    'Durée invalide : ce cours dure %d min, la session saisie fait %d min.',
+                    $courseDuration,
+                    $durationMinutes
+                ));
+                
+                return $this->redirectToRoute('admin_sessions_edit', ['id' => $id]);
+            }
+
+            $session->setStartTime($startTime);
+            $session->setEndTime($endTime);
             $session->setAvailableSpots((int) $request->request->get('available_spots'));
             $session->setStatus($request->request->get('status'));
 
