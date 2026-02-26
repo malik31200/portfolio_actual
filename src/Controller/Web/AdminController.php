@@ -195,20 +195,23 @@ class AdminController extends AbstractController
             $courseId = $request->request->get('course_id');
             $course = $em->getRepository(Course::class)->find($courseId);
 
-            if ($course) {
-                $session->setCourse($course);
+            if (!$course) {
+               $this->addFlash('error', 'Cours non trouvé.');
+               return $this->redirectToRoute('admin_sessions_edit', ['id' => $id]);
             }
+
+            $session->setCourse($course);
 
             $startTime = new \DateTimeImmutable($request->request->get('start_time'));
             $endTime = new \DateTimeImmutable($request->request->get('end_time'));
 
             if ($endTime <= $startTime) {
                 $this->addFlash('error', 'L\'heure de fin doit être après l\'heure de début.');
-                return $this->redirectToRoute('admin_sessions_new');
+                return $this->redirectToRoute('admin_sessions_edit', ['id' => $id]);
             }
 
             $durationMinutes = (int) (($endTime->getTimestamp() - $startTime->getTimestamp()) / 60);
-            $courseDuration = (int) $course->getDuration();
+            $courseDuration = (int) $session->getCourse()->getDuration();
 
             if ($durationMinutes !== $courseDuration) {
                 $this-> addFlash('error', sprintf(
