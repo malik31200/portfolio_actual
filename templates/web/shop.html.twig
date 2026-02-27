@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+
+{% block title %}Acheter un carnet de séances{% endblock %}
+
+
+{% block body %}
+    <h1 class="page-title">🎫 Acheter un carnet de séances</h1>
+
+
+    <p class="shop-intro">
+        Économisez en achetant un carnet de séances ! Plus vous prenez de séances, plus vous économisez.
+            Valable 1 an à partir de la date d'achat.
+    </p>
+
+
+    <div class="shop-grid">
+        {% for book in sessionBooks  %}
+            <div class="shop-card">
+                <div class="shop-card-header">
+                    <h3>{{ book.name }}</h3>
+                    <div class="shop-badge">{{ book.savings }}</div>
+                </div>
+
+
+                <div class="shop-card-body">
+                    <div class="shop-price">
+                        <span class="price-amount">{{ book.price }}</span>
+                        <span class="price-currency">€</span>
+                    </div>
+
+
+                    <div class="shop-details">
+                        <p class="shop-sessions">{{ book.totalSessions }}</p>
+                        <p class="shop-price-per-session">
+                            Soit {{ (book.price / book.totalSessions)|number_format(2,',', '') }} € / séance
+                        </p>
+                        <p class="shop-description">{{ book.description }}</p>
+                        <p class="shop-validity">⏰ Valable 1 an</p>
+                    </div>
+                </div>
+
+
+                <div class="shop-card-footer">
+                    <form method="post" action="{{ path('app_shop_checkout')}}">
+                        <input type="hidden" name="totalSessions" value="{{ book.totalSessions }}">
+                        <button type="submit" class="btn btn-full btn-success">
+                            💳 Acheter maintenant
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+
+    <div class="shop-info">
+        <h3>ℹ️ Informations importantes</h3>
+        <ul>
+            <li>Paiement sécurisé via Stripe</li>
+            <li>Vos séances sont disponibles immédiatement après l'achat</li>
+            <li>Les carnets sont valables 1 an à partir de la date d'achat</li>
+            <li>Les carnets sont automatiquement utilisés lors de vos réservations</li>
+        </ul>
+    </div>
+{% endblock %}
