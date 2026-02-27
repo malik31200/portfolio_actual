@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration - Actual Sport{% endblock %}
+
+{% block body %}
+    <h1 class="page-title">⚙️ Administration</h1>
+
+    {# Statistics #}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stats-content">
+                <div class="stat-number">{{ coursesCount }}</div>
+                <div class="stat-label">Cours disponibles</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stats-content">
+                <div class="stat-number">{{ sessionsCount }}</div>
+                <div class="stat-label">Sessions programmées</div>
+            </div>
+        </div>
+
+        
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stats-content">
+                <div class="stat-number">{{ usersCount }}</div>
+                <div class="stat-label">Utilisateurs inscrits</div>
+            </div>
+        </div>
+    </div>
+
+    {# Actions rapides #}
+    <div class="dashboard-section">
+        <h2 class="section-title">⚡ Actions rapides</h2>
+        <div class="admin-actions">
+            <a href="{{ path('admin_courses_list') }}" class="action-card">
+                <div class="action-icon">➕</div>
+                <div class="action-content">
+                    <h3>Gérer les cours</h3>
+                    <p>Créer, modifier ou supprimer des cours</p>
+                </div>
+            </a>
+
+            <a href="{{ path('admin_sessions_list') }}" class="action-card">
+                <div class="action-icon">📆</div>
+                <div class="action-content">
+                    <h3>Planifier une session</h3>
+                    <p>Planifier, modifier ou supprimer des sessions</p>
+                </div>
+            </a>
+
+            <a href="{{ path('admin_registrations_list') }}" class="action-card">
+                <div class="action-icon">📋</div>
+                <div class="action-content">
+                    <h3>Voir les réservations</h3>
+                    <p>Liste de toutes les réservations</p>
+                </div>
+            </a>
+
+            <a href="{{ path('admin_users_list') }}" class="action-card">
+                <div class="action-icon">👥</div>
+                <div class="action-content">
+                    <h3>Gérer les utilisateurs</h3>
+                    <p>Voir et modifier les rôles des utilisateurs</p>
+                </div>
+            </a>
+
+            <a href="https://dashboard.stripe.com/payments"
+            class="action-card"
+            target="_blank"
+            rel="noopener noreferrer">
+                <div class="action-icon">💰</div>
+                <div class="action-content">
+                    <h3>Gérer les paiements</h3>
+                    <p>Historique et gestion des paiements</p>
+                </div>
+            </a>
+        </div>
+    </div>
+{% endblock %}
