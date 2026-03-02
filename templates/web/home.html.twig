@@ -60,12 +60,14 @@
                 {% for course in courses %}
                     <div class="course-card">
                         <div class="course-icon">
-                            {% if 'yoga' in course.name|lower %}
+                            {% if 'yoga' in course.name|lower or 'pilate' in course.name|lower %}
                                 🧘
                             {% elseif 'boxe' in course.name|lower or 'cardio' in course.name|lower %}
                                 🥊
                             {% elseif 'hiit' in course.name|lower %}
                                 💪
+                             {% elseif 'velo' in course.name|lower %}
+                                🚴‍♂️🔥
                             {% else %}
                                 🏋️
                             {% endif %}
