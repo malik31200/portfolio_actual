@@ -114,7 +114,9 @@ class AdminController extends AbstractController
             ->createQueryBuilder('s')
             ->leftJoin('s.course', 'c')
             ->addSelect('c')
+            ->andWhere('s.startTime >= :now')
             ->orderBy('s.startTime', 'ASC')
+            ->setParameter('now', new \DateTimeImmutable())
             ->getQuery()
             ->getResult();
 
