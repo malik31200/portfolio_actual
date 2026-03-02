@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class BookingControllerTest extends WebTestCase
 {
+    // Redirect to login if user is not connect
     #[DataProvider('protectedRoutesProvider')]
     public function testAnonymousUserIsRedirectedToLogin(string $method, string $path): void
     {
