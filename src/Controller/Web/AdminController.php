@@ -345,6 +345,18 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_registrations_list');
         }
 
+        $session = $registration->getSession();
+        if (!$session) {
+            $this->addFlash('error', 'Session non trouvée pour cette réservation.');
+            return $this->redirectToRoute('admin_registrations_list');
+        }
+
+        $now = new \DateTimeImmutable();
+        if ($session->getStartTime() <= $now) {
+            $this->addFlash('error', 'Impossible d\'annuler une réservation pour une session passée ou en cours.');
+            return $this->redirectToRoute('admin_registrations_list');
+        }
+
         // Change the status
         $registration->setStatus('cancelled');
 
