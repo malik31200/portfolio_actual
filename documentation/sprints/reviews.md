@@ -62,6 +62,7 @@
 - `3f16cb7` : class"user-info-row" to class="user-info-row"
 - `3fbe6df`: in admin/sessions sessions pasted dont appear
 - `3c8b83f`: change text of h2 and p in courses section
+- `2e20089`: add security to dont cancel a reservation already past
 
 ### End-of-sprint demo
 - Admin: course/session/user management, more readable dashboard (do)

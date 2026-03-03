@@ -27,8 +27,9 @@ This log was reconstructed from commits labeled as `fix`.
 | BUG-019 | 2026-02-27 | class"user-info-row" to class="user-info-row" | Added `=` so the class is applied in CSS | `3f16cb7` | Closed |
 | BUG-020 | 2026-03-02 | In admin/sessions, past sessions still appeared | Past sessions were displayed and could still be modified | `3fbe6df` | Closed |
 | BUG-021 | 2026-03-02 | change text of h2 and p in courses section| text no adapt | `963dc83` | Closed |
+| BUG-022 | 2026-03-03 | add security to dont cancel a reservation already past | `2e20089` | Closed |
 
 ## KPI (observed period)
-- Tracked bugs: 21
-- Closed bugs: 21
+- Tracked bugs: 22
+- Closed bugs: 22
 - Resolution rate: 100%
