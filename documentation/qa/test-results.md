@@ -1,26 +1,27 @@
-# Résultats de test QA (MVP)
+# QA Test Results (MVP)
 
-## Preuves disponibles
-- Tests PHPUnit configurés : `phpunit.dist.xml`
-- Fichiers de tests présents :
+## Available evidence
+- PHPUnit tests configured: `phpunit.dist.xml`
+- Test files present:
   - `tests/Controller/Web/AdminControllerTest.php`
   - `tests/Controller/Web/BookingControllerTest.php`
-- Logs applicatifs : `var/log/dev.log`
+- Application logs: `var/log/dev.log`
 
-## Résultats (synthèse)
-| ID | Exécution | Statut | Commentaire |
+## Results (summary)
+| ID | Execution | Status | Comment |
 |---|---|---|---|
-| T-001 | Manuel | OK | Parcours inscription validé |
-| T-002 | Manuel | OK | Connexion validée |
-| T-003 | Manuel | OK | Réservation carnet fonctionnelle |
-| T-004 | Manuel | OK | Flux Stripe corrigé et validé |
-| T-005 | Manuel | OK | Annulation + restitution validées |
-| T-006 | Manuel | OK | Création cours validée |
-| T-007 | Manuel | OK | Création session valide |
-| T-008 | Manuel | OK | Blocage des durées invalides |
-| T-009 | Manuel | OK | Lisibilité admin corrigée |
-| T-010 | Automatisé | À renforcer | Couverture à améliorer (tests existants minimalistes) |
+| T-001 | Manual | OK | Registration flow validated |
+| T-002 | Manual | OK | Login validated |
+| T-003 | Manual | OK | Session book booking works |
+| T-004 | Manual | OK | Stripe flow fixed and validated |
+| T-005 | Manual | OK | Cancellation + credit restore validated for sessionBook |
+| T-006 | Manual | OK | Course creation validated |
+| T-007 | Manual | OK | Valid session creation |
+| T-008 | Manual | OK | Invalid durations correctly blocked |
+| T-009 | Manual | OK | Admin readability fixed |
+| T-010 | Automated | Needs improvement | Coverage should be improved (existing tests are minimal) |
+| T-011 | Manual | OK | Refund completed |
 
-## Conclusion QA
-- Parcours critiques MVP : validés.
-- Points à améliorer : couverture des tests automatisés et traçabilité continue des exécutions.
+## QA Conclusion
+- MVP critical flows: validated.
+- Areas for improvement: automated test coverage and continuous execution traceability.

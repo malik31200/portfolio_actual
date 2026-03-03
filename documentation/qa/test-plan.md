@@ -1,35 +1,36 @@
-# Plan de test QA (MVP)
+# QA Test Plan (MVP)
 
-## Objectif
-Vérifier l'intégration bout-en-bout des parcours critiques du MVP.
+## Objective
+Verify end-to-end integration of the MVP’s critical flows.
 
-## Portée
-- Authentification (inscription, connexion, logout)
-- Cours et sessions (consultation, admin CRUD)
-- Réservation (avec et sans sessionBook)
-- Paiement Stripe et retour dashboard
-- Annulation réservation
+## Scope
+- Authentication (registration, login, logout)
+- Courses and sessions (view, admin CRUD)
+- Booking (with and without sessionBook)
+- Stripe payment and dashboard return flow
+- Booking cancellation
 
-## Environnement
-- Application Symfony locale (branche `feature/malik`)
-- Base de données projet
-- Stripe (mode test)
+## Environment
+- Local Symfony application (branch `feature/malik` and `feature/christophe`)
+- Project database
+- Stripe (test mode)
 
-## Scénarios de test
-| ID | Scénario | Type | Résultat attendu |
+## Test scenarios
+| ID | Scenario | Type | Expected result |
 |---|---|---|---|
-| T-001 | Inscription utilisateur valide | Manuel | Compte créé + redirection login |
-| T-002 | Connexion utilisateur | Manuel | Accès dashboard |
-| T-003 | Réservation avec sessionBook | Manuel | Réservation confirmée + décrément crédit |
-| T-004 | Réservation sans sessionBook (Stripe) | Manuel | Paiement validé + réservation créée |
-| T-005 | Annulation réservation | Manuel | Statut annulé + place/crédit restauré |
-| T-006 | Admin crée un cours | Manuel | Cours visible en liste |
-| T-007 | Admin crée une session cohérente | Manuel | Session créée |
-| T-008 | Admin tente session durée invalide | Manuel | Refus avec message d'erreur |
-| T-009 | Dashboard admin lisibilité cartes stats | Manuel | Texte lisible sur fond violet/bleu |
-| T-010 | Exécution tests PHP existants | Automatisé | Exécution sans erreur bloquante |
+| T-001 | Valid user registration | Manual | Account created + redirected to login |
+| T-002 | User login | Manual | Access to dashboard |
+| T-003 | Booking with sessionBook | Manual | Booking confirmed + session credit decremented |
+| T-004 | Booking without sessionBook (Stripe) | Manual | Payment validated + booking created |
+| T-005 | Booking cancellation | Manual | Status cancelled + seat/credit restored for sessionBook purchase |
+| T-006 | Admin creates a course | Manual | Course visible in list |
+| T-007 | Admin creates a valid session | Manual | Session created |
+| T-008 | Admin tries to create invalid-duration session | Manual | Rejected with error message |
+| T-009 | Admin dashboard stats card readability | Manual | Text readable on purple/blue background |
+| T-010 | Run existing PHP tests | Automated | Execution without blocking errors |
+| T-011 | Refund for single-session purchase (without sessionBook) | Manual | Refund complet and will verify on Stripe dashboard |
 
-## Critères d'acceptation
-- Aucune régression sur parcours critiques.
-- 100% des Must Have testés.
-- Tout bug critique corrigé avant livraison.
+## Acceptance criteria
+- No regressions on critical flows.
+- 100% of Must Have items tested.
+- All critical bugs fixed before release.
