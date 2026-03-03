@@ -134,10 +134,12 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if payment.sessionBook %}
+                                    {% if payment.registration and payment.registration.status == 'cancelled' %}
+                                        Remboursé
+                                    {% elseif payment.sessionBook %}
                                         {{ payment.sessionBook.name }}
                                     {% else %}
-                                        -
+                                        Payé
                                     {% endif %}
                                 </td>
                             </tr>

@@ -14,6 +14,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
+use Stripe\Refund;
+use Stripe\Exception\ApiErrorException;
 
 
 class BookingController extends AbstractController
@@ -168,14 +170,6 @@ class BookingController extends AbstractController
             return $this->redirectToRoute('app_dashboard');
         }
 
-        // Cancel the registration
-        $registration->setStatus('cancelled');
-        $registration->setCancelledAt(new \DateTimeImmutable());
-
-        // Free the spot in the session
-        $session = $registration->getSession();
-        $session->setAvailableSpots($session->getAvailableSpots() + 1);
-
         // If a sessionBook was used, recredit it
         if ($registration->getSessionBook()) {
             $sessionBook = $registration->getSessionBook();
@@ -184,8 +178,44 @@ class BookingController extends AbstractController
 
             $this->addFlash('success', 'Réservation annulée avec succès. Votre crédit du carnet a été restauré.');
         } else {
-            $this->addFlash('success', 'Réservation annulée avec succès.');
+            $payment = $em->getRepository(Payment::class)->findOneBy([
+                'registration' => $registration
+            ]);
+
+            if (!$payment || !$payment->getStripePaymentId()) {
+                $this->addFlash('error', 'Paiement introuvable pour cette réservation.');
+                return $this->redirectToRoute('app_dashboard');
+            }
+
+            Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+
+            try {
+                $checkoutSession = StripeSession::retrieve($payment->getStripePaymentId());
+
+                if (empty($checkoutSession->payment_intent)) {
+                    $this->addFlash('error', 'Impossible de retrouver le PaymentIntent Stripe pour le remboursement.');
+                    return $this->redirectToRoute('app_dashboard');
+                }
+
+                Refund::create([
+                    'payment_intent' => $checkoutSession->payment_intent,
+                ]);
+
+                $this->addFlash('success', 'Réservation annulée avec succès. Votre paiement a été remboursé .');
+            } catch (ApiErrorException $e) {
+                $this->addFlash('error', 'Annulation impossible : échec du remboursement Stripe (' . $e->getMessage() . ').');
+                return $this->redirectToRoute('app_dashboard');
+            }
+
         }
+
+        // Cancel the registration
+        $registration->setStatus('cancelled');
+        $registration->setCancelledAt(new \DateTimeImmutable());
+
+        // Free the spot in the session
+        $session = $registration->getSession();
+        $session->setAvailableSpots($session->getAvailableSpots() + 1);
 
         $em->persist($registration);
         $em->persist($session);
