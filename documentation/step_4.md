@@ -18,6 +18,8 @@
 - [4. Final Integration and QA Testing](#4-final-integration-and-qa-testing)
 - [5. Deliverables](#5-deliverables)
 
+[🔝 Back to top](#stage-4-mvp-development)
+
 ## 0. Plan and Define Sprints
 
 ### Objective
@@ -89,6 +91,8 @@ Structure the platform development (courses, sessions, bookings, Stripe, admin a
 - **QA:** test scenarios, non-regression checks, release validation.
 - **DevOps:** environment, secrets management, deployment.
 
+[🔝 Back to top](#stage-4-mvp-development)
+
 ## 1. Execute Development Tasks
 
 ### Instructions
@@ -126,6 +130,8 @@ git merge feature/malik
 
 - **QA (Malik + Christophe):** validate the full user journey (book, pay, return to dashboard, cancel), then apply fixes if needed.
 
+[🔝 Back to top](#stage-4-mvp-development)
+
 ## 2. Monitor Progress and Adjust
 
 ### Objective
@@ -145,6 +151,8 @@ Track team performance, measure progress, and handle blockers quickly.
 - **Completed vs planned (%)** = (completed tasks ÷ planned tasks) × 100.
 - **Bugs:** opened count, resolved count, **resolution rate** = resolved ÷ opened × 100.
 - **Blockers:** count + average resolution time.
+
+[🔝 Back to top](#stage-4-mvp-development)
 
 ## 3. Conduct Sprint Reviews and Retrospectives
 
@@ -177,6 +185,8 @@ Evaluate end-of-sprint outcomes, demonstrate delivered features, and continuousl
 | What worked well | 2–3 strong points |
 | What worked less well | 2–3 blockers/issues |
 | Improvement actions | Specific actions + owner + due date |
+
+[🔝 Back to top](#stage-4-mvp-development)
 
 ## 4. Final Integration and QA Testing
 
@@ -224,3 +234,5 @@ Ensure all MVP components work smoothly together and comply with quality standar
 | Sprint reviews | `reviews.md` |
 | Retrospectives | `retrospectives.md` |
 | Production environment | `docker-compose.yml`, `Dockerfile` (local containerized environment; no public production URL specified) |
+
+[🔝 Back to top](#stage-4-mvp-development)
