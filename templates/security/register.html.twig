@@ -8,6 +8,7 @@
             <h1 class="auth-title">📝 Inscription</h1>
 
             <form method="post" action="{{ path('app_register') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('register_form') }}">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="first_name">Prénom</label>
