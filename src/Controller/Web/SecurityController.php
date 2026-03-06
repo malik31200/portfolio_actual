@@ -42,6 +42,11 @@ class SecurityController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('register_form', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token CSRF invalide.');
+                return $this->redirectToRoute('app_register');
+            }
+            
             $email = $request->request->get('email');
             $password = $request->request->get('password');
             $confirmPassword = $request->request->get('confirm_password');
