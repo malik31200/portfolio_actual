@@ -136,7 +136,7 @@ portfolio_actual/
 ### What Was Implemented
 
 **Authentication & Security**
-- ✔️ User gistration with email/password
+- ✔️ User registration with email/password
 - ✔️ Secure login with bcrypt password hashing
 - ✔️ Role-based access control (ROLE_USER, ROLE_ADMIN)
 - ✔️ CSRF token protection on forms
