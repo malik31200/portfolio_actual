@@ -186,7 +186,7 @@ portfolio_actual/
 
 ## 📞 Contact
   
-**Malik BOUNANI** - malik.bounani@holbertonstudents.com
+**Malik BOUANANI** - malik.bouanani@holbertonstudents.com
 **Christophe BARRERE** - christophe.barrere@holbertonstudents.com
 
 **© 2026 - Holberton School Toulouse**
